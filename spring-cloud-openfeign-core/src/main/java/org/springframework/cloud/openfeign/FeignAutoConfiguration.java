@@ -70,6 +70,10 @@ public class FeignAutoConfiguration {
 		return HasFeatures.namedFeature("Feign", Feign.class);
 	}
 
+	/**
+	 *在初始化FeignContext时，会把configurations在容器中放入FeignContext中。configurations的
+	 * 来源就是在前面registerFeignClients方法中将@FeignClient的配置configuration。
+	 */
 	@Bean
 	public FeignContext feignContext() {
 		FeignContext context = new FeignContext();

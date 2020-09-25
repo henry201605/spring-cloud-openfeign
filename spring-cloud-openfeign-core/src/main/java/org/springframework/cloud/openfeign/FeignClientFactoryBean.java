@@ -127,7 +127,7 @@ public class FeignClientFactoryBean
 	protected void configureFeign(FeignContext context, Feign.Builder builder) {
 		FeignClientProperties properties = applicationContext
 				.getBean(FeignClientProperties.class);
-
+//		从上下文中获取一个Client，默认是LoadBalancerFeignClient。
 		FeignClientConfigurer feignClientConfigurer = getOptional(context,
 				FeignClientConfigurer.class);
 		setInheritParentContext(feignClientConfigurer.inheritParentConfiguration());
@@ -329,9 +329,11 @@ public class FeignClientFactoryBean
 	 * information
 	 */
 	<T> T getTarget() {
+		//实例化Feign上下文对象FeignContext
 		FeignContext context = applicationContext.getBean(FeignContext.class);
-		Feign.Builder builder = feign(context);
+		Feign.Builder builder = feign(context);//构建Builder对象
 
+		//如果url为空，则走负载均衡，生成有负载均衡功 能的代理类
 		if (!StringUtils.hasText(url)) {
 			if (!name.startsWith("http")) {
 				url = "http://" + name;
@@ -343,6 +345,7 @@ public class FeignClientFactoryBean
 			return (T) loadBalance(builder, context,
 					new HardCodedTarget<>(type, name, url));
 		}
+		//如果指定了url，则生成默认的代理类
 		if (StringUtils.hasText(url) && !url.startsWith("http")) {
 			url = "http://" + url;
 		}
@@ -355,7 +358,7 @@ public class FeignClientFactoryBean
 				client = ((FeignBlockingLoadBalancerClient) client).getDelegate();
 			}
 			builder.client(client);
-		}
+		}//生成默认代理类
 		Targeter targeter = get(context, Targeter.class);
 		return (T) targeter.target(this, builder, context,
 				new HardCodedTarget<>(type, name, url));

@@ -141,7 +141,16 @@ class FeignClientsRegistrar
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata,
 			BeanDefinitionRegistry registry) {
+
+		/*
+		 * //注册@EnableFeignClients中定义defaultConfiguration属性下的类，包装成 FeignClientSpecification，注册到Spring容器。
+		 //在@FeignClient中有一个属性：configuration，这个属性是表示各个FeignClient自定义的配 置类，后面也会通过调用registerClientConfiguration方法来注册成FeignClientSpecification 到容器。
+		 //所以，这里可以完全理解在@EnableFeignClients中配置的是做为兜底的配置，在各个@FeignClient 配置的就是自定义的情况。
+		 */
+		//从 SpringBoot 启动类上检查是否有@EnableFeignClients, 有该注解的话， 则完成 Feign 框架相关的一些配置内容注册
 		registerDefaultConfiguration(metadata, registry);
+
+		//这个方法主要是扫描类路径下所有的@FeignClient注解，然后进行动态Bean的注入。
 		registerFeignClients(metadata, registry);
 	}
 
@@ -226,6 +235,7 @@ class FeignClientsRegistrar
 	private void registerFeignClient(BeanDefinitionRegistry registry,
 			AnnotationMetadata annotationMetadata, Map<String, Object> attributes) {
 		String className = annotationMetadata.getClassName();
+		//BeanDefinitionBuilder是用来构建一个BeanDefinition的，它是通过genericBeanDefinition() 来构建的，并且传入了一个FeignClientFactoryBean的类
 		BeanDefinitionBuilder definition = BeanDefinitionBuilder
 				.genericBeanDefinition(FeignClientFactoryBean.class);
 		validate(attributes);
